@@ -1,0 +1,4 @@
+/DevTunnels
+**/__pycache__/
+.env
+.venv
