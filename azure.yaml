@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: acs-voice-bot-and-real-time-transcription
+metadata:
+    template: azd-init@1.10.4
+services:
+    backend:
+        project: app/backend
+        host: containerapp
+        language: dotnet
+    frontend:
+        project: app/frontend
+        host: containerapp
+        language: js
+        dist: dist

@@ -1,0 +1,7 @@
+**/appsettings.json
+/.azure
+/bin
+/obj
+/Debug
+/node_modules
+/build
