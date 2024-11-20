@@ -74,6 +74,10 @@ app.Use(async (context, next) =>
         // Set the single WebSocket connection
         await mediaService.ProcessWebSocketAsync();
     }
+    else if (context.Request.Path == "/ws")
+    {
+        Console.WriteLine("Ws request received");
+    }
     else
     {
         await next(context);

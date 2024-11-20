@@ -1,5 +1,5 @@
 import type { MetaFunction } from "@remix-run/node";
-import { useContext, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,6 +9,18 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  const [messages, setMessages] = useState<string[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket('https://echo.websocket.org/.ws');
+    // Connection opened
+    socket.addEventListener("open", (event) => {
+      socket.send("Hello Server!");
+    });
+    // Listen for messages
+    socket.addEventListener("message", (event) => {
+      setMessages((prev) => [...prev, event.data]);
+    });
+  }, [messages]);
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-16">
@@ -27,6 +39,9 @@ export default function Index() {
               alt="Remix"
               className="hidden w-full dark:block"
             />
+          </div>
+          <div>
+            {messages && <div>{messages}</div>}
           </div>
         </header>
       </div>

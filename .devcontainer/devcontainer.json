@@ -30,9 +30,10 @@
       "vscode": {
         "settings": {},
         "extensions": [
-          "GitHub.copilot",
-          "ms-vsliveshare.vsliveshare",
-          "ms-azuretools.vscode-bicep"
+            "GitHub.copilot",
+            "ms-vsliveshare.vsliveshare",
+            "ms-azuretools.vscode-bicep",
+            "ms-dotnettools.csdevkit"
         ]
       }
     },
