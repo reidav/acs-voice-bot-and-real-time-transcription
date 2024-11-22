@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import logoS from "./logo-s.png";
 
 export const meta: MetaFunction = () => {
   return [
@@ -10,40 +11,60 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const [messages, setMessages] = useState<string[]>([]);
+  const initialized = useRef(false)
+
   useEffect(() => {
-    const socket = new WebSocket('https://echo.websocket.org/.ws');
-    // Connection opened
-    socket.addEventListener("open", (event) => {
-      socket.send("Hello Server!");
-    });
-    // Listen for messages
-    socket.addEventListener("message", (event) => {
-      setMessages((prev) => [...prev, event.data]);
-    });
-  }, [messages]);
+    if (!initialized.current) {
+      console.log("init");
+      initialized.current = true
+
+      const socket = new WebSocket('ws://localhost:8000/ws');
+      // Connection opened
+      socket.addEventListener("open", (event) => { });
+      // Listen for messages
+      socket.addEventListener("message", (event) => {
+        // Add message to set of messages
+        setMessages((prevMessages) => [...prevMessages, event.data]);
+      });
+    }
+  }, []);
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="flex flex-col items-center gap-16">
-        <header className="flex flex-col items-center gap-9">
-          <h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
-            Azure Communication Services
-          </h1>
-          <div className="h-[144px] w-[434px]">
-            <img
-              src="/logo-light.png"
-              alt="Remix"
-              className="block w-full dark:hidden"
-            />
-            <img
-              src="/logo-dark.png"
-              alt="Remix"
-              className="hidden w-full dark:block"
-            />
-          </div>
-          <div>
-            {messages && <div>{messages}</div>}
-          </div>
-        </header>
+    <div className="m-16 flex justify-center items-center" role="main">
+      <div className="px-16">
+        <img src="./logo-s.png" alt="image description">
+        </img>
+        <p className="h-10 text-green-900 font-headline tracking-tight font-extrabold">Azure Communication Service</p>
+        <hr className="w-3/5" />
+        <h1
+          className="mt-6 text-5xl font-headline tracking-tight text-gray-900 leading-snug"
+          role="heading"
+          aria-level={1}
+        >
+          We got your plants. <br />
+          <span className="text-green-700" role="heading" aria-level={1}
+          >And we deliver them for you.</span>
+        </h1>
+        <p className="w-3/5 mt-2 text-gray-600 text-lg" aria-level={2}>
+          Our hand-picked collection of plants gives you all the natural wonders
+          you ever wanted in your room, living space or even kitchen.
+        </p>
+        <div className="mt-8 flex" role="button">
+          <a
+            className="flex items-center justify-center px-8 py-3 font-medium rounded-md text-white bg-green-700 shadow uppercase hover:bg-green-800 hover:shadow-lg transform transition hover:-translate-y-1 focus:ring-2 focus:ring-green-600 ring-offset-2 outline-none focus:bg-green-800 focus:shadow-lg active:bg-green-900"
+            href="#"
+          >See the collection</a>
+          <a
+            className="flex items-center justify-center px-8 py-3 ml-4 font-medium rounded-md text-green-700 bg-white shadow uppercase hover:shadow-lg transform transition hover:-translate-y-1 focus:ring-2 focus:ring-green-600 ring-offset-2 outline-none focus:shadow-lg"
+            href="#"
+          >Learn more</a>
+        </div>
+      </div>
+      <div className="mr-40" role="img">
+        <img
+          className="object-cover object-center w-96 rounded-md hover:shadow-lg transform transition hover:-translate-y-2"
+          src="https://images.pexels.com/photos/3952029/pexels-photo-3952029.jpeg"
+          alt="Image of plants"
+        />
       </div>
     </div>
   );

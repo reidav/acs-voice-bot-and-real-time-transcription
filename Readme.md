@@ -12,3 +12,6 @@ ACS Voice Bot & Real Time Transcription is a sample application that demonstrate
 # Devtunnel
 devtunnel login
 devtunnel host -p 8000 -allow-anonymous
+
+
+dotnet run --urls=http://localhost:8000/

@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using Api.Services;
+using Api.Sockets;
 using Azure.Communication.CallAutomation;
 using Azure.Messaging;
 using Azure.Messaging.EventGrid;
@@ -17,6 +19,9 @@ var app = builder.Build();
 
 var configuration = app.Services.GetRequiredService<IConfiguration>();
 var transcriptService = app.Services.GetRequiredService<ITranscriptService>();
+
+ConcurrentDictionary<string, WebAppSocketHandler> _connections = new ConcurrentDictionary<string, WebAppSocketHandler>();
+// ConcurrentDictionary<string, string> _transcript = new ConcurrentDictionary<string, string>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -56,7 +61,6 @@ app.Use(async (context, next) =>
 
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
         transcriptService.TranscriptCompleted += TranscriptService_TranscriptCompleted;
-
         await transcriptService.ProcessRequest(webSocket);
     }
     else if (context.Request.Path == "/ws/voice")
@@ -76,7 +80,17 @@ app.Use(async (context, next) =>
     }
     else if (context.Request.Path == "/ws")
     {
-        Console.WriteLine("Ws request received");
+        using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+        var socketHandler = new WebAppSocketHandler(webSocket);
+        string newId = Guid.NewGuid().ToString("N");
+        Console.WriteLine("Ws request received - {0}", newId);
+        if (_connections.TryAdd(newId, socketHandler))
+            Console.WriteLine("Ws added - {0}", newId);
+        await socketHandler.ProcessWebSocketAsync();
+
+        if (_connections.TryRemove(newId, out var _))
+            Console.WriteLine("Ws removed - {0}", newId);
+        Console.WriteLine("Ws disconnected");
     }
     else
     {
@@ -86,41 +100,51 @@ app.Use(async (context, next) =>
 
 async void TranscriptService_TranscriptCompleted(object? sender, TranscriptEventArgs e)
 {
-    if (e.Data.Text.Contains("sandra", StringComparison.InvariantCultureIgnoreCase))
+    Console.WriteLine($"Transcript completed: {e.Data.Text}");
+    Task.Run(() =>
     {
-        var callbackUriHost = configuration.GetValue<string>("CallbackUriHost");
-        var callAutomationClient = new CallAutomationClient(
-            configuration.GetValue<string>("AcsConnectionString")
-        );
-
-        try
+        foreach (var con in _connections)
         {
-            var con = callAutomationClient.GetCallConnection(e.Metadata.CallConnectionId);
-            var media = con.GetCallMedia();
-            await media.StartMediaStreamingAsync();
+            Console.WriteLine("sending to {0} ...", con.Key);
+            _ = con.Value.SendMessageAsync(e.Data.Text);
         }
-        catch (Exception)
-        { // TODO : Manage exception better
-        }
-    }
- 
-    if (e.Data.Text.Contains("silence", StringComparison.InvariantCultureIgnoreCase))
-    {
-        var callbackUriHost = configuration.GetValue<string>("CallbackUriHost");
-        var callAutomationClient = new CallAutomationClient(
-            configuration.GetValue<string>("AcsConnectionString")
-        );
+    });
 
-        try
-        {
-            var con = callAutomationClient.GetCallConnection(e.Metadata.CallConnectionId);
-            var media = con.GetCallMedia();
-            await media.StopMediaStreamingAsync();
-        }
-        catch (Exception)
-        { // TODO : Manage exception better
-        }
-    }
+    // if (e.Data.Text.Contains("sandra", StringComparison.InvariantCultureIgnoreCase))
+    // {
+    //     var callbackUriHost = configuration.GetValue<string>("CallbackUriHost");
+    //     var callAutomationClient = new CallAutomationClient(
+    //         configuration.GetValue<string>("AcsConnectionString")
+    //     );
+
+    //     try
+    //     {
+    //         var con = callAutomationClient.GetCallConnection(e.Metadata.CallConnectionId);
+    //         var media = con.GetCallMedia();
+    //         await media.StartMediaStreamingAsync();
+    //     }
+    //     catch (Exception)
+    //     { // TODO : Manage exception better
+    //     }
+    // }
+
+    // if (e.Data.Text.Contains("silence", StringComparison.InvariantCultureIgnoreCase))
+    // {
+    //     var callbackUriHost = configuration.GetValue<string>("CallbackUriHost");
+    //     var callAutomationClient = new CallAutomationClient(
+    //         configuration.GetValue<string>("AcsConnectionString")
+    //     );
+
+    //     try
+    //     {
+    //         var con = callAutomationClient.GetCallConnection(e.Metadata.CallConnectionId);
+    //         var media = con.GetCallMedia();
+    //         await media.StopMediaStreamingAsync();
+    //     }
+    //     catch (Exception)
+    //     { // TODO : Manage exception better
+    //     }
+    // }
 }
 
 app.Run();
