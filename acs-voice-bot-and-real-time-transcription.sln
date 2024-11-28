@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app", "app", "{89D3164D-59E3-47A5-9A88-905A61778253}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app", "app", "{DEFCE205-79C4-4F9A-A094-8A8AFB7633F5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "app\backend\Api.csproj", "{D93B734D-455C-4191-9A05-EE0451DD8703}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "app\backend\Api.csproj", "{28CC4D13-F3EB-4E23-8690-CE5F155E4E8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,18 +13,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D93B734D-455C-4191-9A05-EE0451DD8703}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D93B734D-455C-4191-9A05-EE0451DD8703}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D93B734D-455C-4191-9A05-EE0451DD8703}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D93B734D-455C-4191-9A05-EE0451DD8703}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28CC4D13-F3EB-4E23-8690-CE5F155E4E8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28CC4D13-F3EB-4E23-8690-CE5F155E4E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28CC4D13-F3EB-4E23-8690-CE5F155E4E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28CC4D13-F3EB-4E23-8690-CE5F155E4E8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{D93B734D-455C-4191-9A05-EE0451DD8703} = {89D3164D-59E3-47A5-9A88-905A61778253}
+		{28CC4D13-F3EB-4E23-8690-CE5F155E4E8B} = {DEFCE205-79C4-4F9A-A094-8A8AFB7633F5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {28EC7CE1-801C-4700-A08A-D36C9B4868BE}
+		SolutionGuid = {A91070CC-450D-43DE-800E-2F58A2D0FCB9}
 	EndGlobalSection
 EndGlobal
