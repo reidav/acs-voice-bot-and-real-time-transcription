@@ -5,3 +5,6 @@
 /Debug
 /node_modules
 /build
+.DS_Store
+/tools
+**/*.sln

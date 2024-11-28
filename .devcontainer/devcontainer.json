@@ -28,11 +28,15 @@
     "customizations": {
       // Configure properties specific to VS Code.
       "vscode": {
-        "settings": {},
+        "settings": { 
+          "editor.tabSize": 4,
+          "terminal.integrated.defaultProfile.linux": "zsh"
+        },
         "extensions": [
-          "GitHub.copilot",
-          "ms-vsliveshare.vsliveshare",
-          "ms-azuretools.vscode-bicep"
+            "GitHub.copilot",
+            "ms-vsliveshare.vsliveshare",
+            "ms-azuretools.vscode-bicep",
+            "ms-dotnettools.csdevkit"
         ]
       }
     },

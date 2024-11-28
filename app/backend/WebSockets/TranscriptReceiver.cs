@@ -1,38 +1,12 @@
-using System.Net.WebSockets;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Xml.Linq;
-using Azure.Communication.CallAutomation;
+using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Api.Services;
+namespace Api.WebSockets;
 
-public interface ITranscriptService
+public class TranscriptReceiver(ILogger<TranscriptReceiver> logger) : ITranscriptReceiver
 {
-    event EventHandler<TranscriptEventArgs>? TranscriptCompleted;
+    private readonly ILogger<TranscriptReceiver> logger = logger;
 
-    Task ProcessRequest(WebSocket webSocket);
-}
-
-public class TranscriptEventArgs : EventArgs
-{
-    private TranscriptionMetadata _metadata;
-    private TranscriptionData _data;
-
-    public TranscriptEventArgs(TranscriptionMetadata metadata, TranscriptionData data)
-    {
-        this._metadata = metadata;
-        this._data = data;
-    }
-
-    public TranscriptionMetadata Metadata { get { return this._metadata; } }
-
-    public TranscriptionData Data { get { return this._data; } }
-}
-
-public class TranscriptService(ILogger<TranscriptService> logger) : ITranscriptService
-{
-    public event EventHandler<TranscriptEventArgs>? TranscriptCompleted;
-
+    public event EventHandler<TranscriptReceivedEventArgs>? TranscriptCompleted;
 
     public async Task ProcessRequest(WebSocket webSocket)
     {
@@ -51,7 +25,7 @@ public class TranscriptService(ILogger<TranscriptService> logger) : ITranscriptS
                     string msg = Encoding.UTF8.GetString(buffer, 0, receiveResult.Count);
                     logger.LogInformation($"Received message: {msg}");
 
-                    var response = StreamingDataParser.Parse(msg);
+                    var response = StreamingData.Parse(msg);
 
                     if (response is TranscriptionMetadata transcriptionMetadata)
                     {
@@ -81,7 +55,7 @@ public class TranscriptService(ILogger<TranscriptService> logger) : ITranscriptS
                         }
                         logger.LogInformation("***************************************************************************************");
 
-                        TranscriptCompleted?.Invoke(this, new TranscriptEventArgs(metadata!, transcriptionData));                        
+                        TranscriptCompleted?.Invoke(this, new TranscriptReceivedEventArgs(metadata!, transcriptionData));                        
                     }
 
                     await webSocket.SendAsync(
