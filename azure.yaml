@@ -3,13 +3,22 @@
 name: acs-voice-bot-and-real-time-transcription
 metadata:
     template: azd-init@1.10.4
-services:
-    backend:
-        project: app/backend
-        host: containerapp
-        language: dotnet
-    frontend:
-        project: app/frontend
-        host: containerapp
-        language: js
-        dist: dist
+hooks:
+  prerestore: # Example of an inline script. (shell is required for inline scripts)
+    shell: sh
+    run: echo 'Hello'
+  preprovision: # Example of external script (Relative path from project root)
+    shell: sh
+    interactive: true
+    continueOnError: false
+    run: ./infra/hooks/echo.sh
+# services:
+#     backend:
+#         project: app/backend
+#         host: containerapp
+#         language: dotnet
+#     frontend:
+#         project: app/frontend
+#         host: containerapp
+#         language: js
+#         dist: dist

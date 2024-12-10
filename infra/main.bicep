@@ -6,6 +6,10 @@ targetScope = 'subscription'
 param environmentName string
 
 @description('Primary location for all resources')
+@allowed([
+    'eastus2'
+    'swedencentral'
+  ])
 param location string
 
 @description('Name of the resource group')
@@ -19,9 +23,6 @@ param acsServiceName string = ''
 param acsServiceResourceGroupName string = ''
 
 /* Azure AI Multi service resource details */
-
-@description('Location of the resource group for the AI Multi Service')
-param aiServiceResourceGroupLocation string = location
 
 @description('Name of the resource group for the AI Multi Service')
 param aiServiceResourceGroupName string = ''
@@ -39,9 +40,6 @@ param searchIndexName string = 'solar-index'
 
 @description('Name of the Azure Cognitive Search service')
 param searchServiceName string = ''
-
-@description('Location of the resource group for the Azure Cognitive Search service')
-param searchServiceResourceGroupLocation string = location
 
 @description('Name of the resource group for the Azure Cognitive Search service')
 param searchServiceResourceGroupName string = ''
@@ -65,14 +63,23 @@ param storageResourceGroupName string = ''
 
 /* Azure openai service resource details */
 
-@description('Capacity of the chat GPT deployment. Default: 30')
-param chatGptDeploymentCapacity int = 30
+@description('Capacity of the gpt4o-realtime deployment. Default: 3')
+param gpt4oRealtimeDeploymentCapacity int = 3
 
-@description('Name of the chat GPT deployment')
-param chatGptDeploymentName string = 'chatgpt-deployment'
+@description('Name of the gpt4o-realtime  deployment')
+param gpt4oRealtimeDeploymentName string = 'gpt-4o-realtime-deployment'
 
-@description('Name of the chat GPT model. Default: gpt-35-turbo')
-param chatGptModelName string = 'gpt-35-turbo'
+@description('Name of the gpt4o-realtime  model. Default: gpt-4o-realtime-preview')
+param gpt4oRealtimeModelName string = 'gpt-4o-realtime-preview'
+
+@description('Capacity of the gpt-4o deployment. Default: 30')
+param gpt4oDeploymentCapacity int = 30
+
+@description('Name of the gpt-4o deployment')
+param gpt4oDeploymentName string = 'gpt-4o-deployment'
+
+@description('Name of the gpt-4o  model. Default: gpt-4o')
+param gpt4oModelName string = 'gpt-4o'
 
 @description('Location of the resource group for the OpenAI resources')
 param openAiResourceGroupLocation string = location
@@ -125,25 +132,31 @@ module communicationServive 'core/communication-services.bicep' = {
     }
 }
 
+// Not all region are supported for the cognitive service integration with azure communication service
+// https://learn.microsoft.com/en-us/azure/communication-services/concepts/call-automation/azure-communication-services-azure-cognitive-services-integration#azure-ai-services-regions-supported
+// uksouth enforced for the cognitive service
 module cognitiveMultiService 'core/cognitive-services.bicep' = {
     name: 'cognitive-service'
     scope: cognitiveServiceResourceGroup
     params: {
         name: !empty(aiServiceName) ? aiServiceName : '${abbrs.cognitiveMultiServiceAccount}${resourceToken}'
         kind: 'CognitiveServices'
-        location: aiServiceResourceGroupLocation
+        location: 'uksouth'
         sku: {
             name: aiServiceSkuName
         }
     }
 }
 
+// Not all region are supported for azure search service using semantic search
+// https://learn.microsoft.com/en-us/azure/search/search-region-support#europe
+// francecentral enforced for the search service
 module searchService 'core/search-services.bicep' = {
     name: 'search-service'
     scope: searchServiceResourceGroup
     params: {
-        name: !empty(searchServiceName) ? searchServiceName : 'gptkb-${resourceToken}'
-        location: searchServiceResourceGroupLocation
+        name: !empty(searchServiceName) ? searchServiceName : '${abbrs.searchSearchServices}${resourceToken}'
+        location: 'francecentral'
         authOptions: {
             aadOrApiKey: {
                 aadAuthFailureMode: 'http401WithBearerChallenge'
@@ -173,22 +186,34 @@ module openAi 'core/cognitive-services.bicep' = {
    name: 'openai'
    scope: openAiResourceGroup
     params: {
-        name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
+        name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.openai}${resourceToken}'
         location: openAiResourceGroupLocation
         sku: {
             name: openAiSkuName
         }
         deployments: [
             {
-                name: chatGptDeploymentName
+                name: gpt4oRealtimeDeploymentName
                 model: {
                     format: 'OpenAI'
-                    name: chatGptModelName
-                    version: '0613'
+                    name: gpt4oRealtimeModelName
+                    version: '2024-10-01'
                 }
                 sku: {
-                    name: 'Standard'
-                    capacity: chatGptDeploymentCapacity
+                    name: 'GlobalStandard'
+                    capacity: gpt4oRealtimeDeploymentCapacity
+                }
+            }
+            {
+                name: gpt4oDeploymentName
+                model: {
+                    format: 'OpenAI'
+                    name: gpt4oModelName
+                    version: '2024-08-06'
+                }
+                sku: {
+                    name: 'DataZoneStandard'
+                    capacity: gpt4oDeploymentCapacity
                 }
             }
         ]
@@ -196,7 +221,8 @@ module openAi 'core/cognitive-services.bicep' = {
 }
 
 output AZURE_LOCATION string = location
-output AZURE_OPENAI_DEPLOYMENT_NAME string = chatGptDeploymentName
+output AZURE_OPENAI_GPT4O_RT_DEPLOYMENT_NAME string = gpt4oRealtimeDeploymentName
+output AZURE_OPENAI_GPT4O_DEPLOYMENT_NAME string = gpt4oDeploymentName
 output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
 output AZURE_OPENAI_KEY string = openAi.outputs.key
 

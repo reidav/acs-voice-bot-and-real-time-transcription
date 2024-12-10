@@ -1,4 +1,3 @@
 echo "Starting backend"
-cd app/backend
-dotnet restore
-dotnet run --urls=http://localhost:8000/
+(cd ../app/backend && dotnet restore)
+(cd ../app/backend && dotnet run --urls=http://0.0.0.0:8000/)
